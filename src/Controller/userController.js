@@ -27,7 +27,7 @@ const allUsers = async(req,res) => {
 const createUser = async(req,res)=>{
 
     let payload = req.body;
-
+    var phonePattern = "^((\\+91-?)|0)?[0-9]{10}$";
     //check if image included in payload
     var imageUrl = '';
     if(req.file)
@@ -37,8 +37,13 @@ const createUser = async(req,res)=>{
     //return console.log(payload);
 
     try{
-        const userCreate = await User(payload).save();
-        return res.status(200).json({status:200, message:"user created successfully", data: userCreate})
+        if(payload.phoneNumber.match(phonePattern)){
+            const userCreate = await User(payload).save();
+            return res.status(200).json({status:200, message:"user created successfully", data: userCreate})
+        }else{
+            return res.status(400).json({status:400, message:"Invalid phone number", error:true}) 
+        }
+        
     }catch(err){
         return res.status(400).json({status:400, message:err.message, error:true}) 
     }
@@ -84,17 +89,12 @@ const updateUser = async(req, res) => {
      }
      try{
        
-         // check if user has image then first delete file and then upload
          const userInfo = await User.findById(id);
          if(!userInfo){
                 res.status(404);
                 throw new Error('User not found')
          }
-         //const userPhotoInfo =userInfo.avatar;
-        //  if(userPhotoInfo){
-        //     fs.unlinkSync(DIR + userPhotoInfo)
-        //  }
-
+        
          const updateUserData = await User.findByIdAndUpdate( req.params.id,payload,{new:true})
          updateUserData.avatar = payload.avatar ?  payload.avatar : userInfo.avatar
          updateUserData.imageUrl = payload.imageUrl ?  payload.imageUrl : userInfo.imageUrl
@@ -128,5 +128,24 @@ const deleteUser = async(req, res) => {
 
 }
 
+const checkEmailExists = async(req, res) => {
+    console.log(req.body.email)
+  try{
+    if(req.body.email !== undefined){
+    const singleUserData = await User.findOne({ email: req.body.email });
+    if(singleUserData !== null){
+    return res.status(200).json({status:200, message:"Email already exists", data: singleUserData}) 
+    }else{
+        return res.status(201).json({status:201, message:"Email is not registered", data: singleUserData}) 
+    }
+    }else{
+        return res.status(400).json({status:400, message:"Email is required", error:true}) 
+    }
+  }catch(err){
+    return res.status(400).json({status:400, message:err.message, error:true}) 
+  }
+}
 
-module.exports = {createUser, singleUser, updateUser, deleteUser, allUsers};
+
+
+module.exports = {createUser, singleUser, updateUser, deleteUser, allUsers, checkEmailExists};
