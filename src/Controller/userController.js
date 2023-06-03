@@ -11,7 +11,6 @@ const allUsers = async(req,res) => {
       console.log(user)
       if(user.avatar !== ''){
       var getImageName = user.avatar.match(/\/([^\/?#]+)[^\/]*$/);
-      console.log(getImageName)
       let imageUrl = `http://localhost:3000/uploads/${getImageName[1]}`;
       user.imageUrl = imageUrl;
       }
@@ -73,11 +72,16 @@ const updateUser = async(req, res) => {
     let payload = req.body;
     
      //check if image included in payload
-     var imageUrl = '';
-     if(req.file)
-     var imageUrl = `Storage/images/${req.file.filename}`;
-     payload.avatar = imageUrl;
-
+     var storageUrl = '';
+     if(req.file){
+       var storageUrl = `Storage/images/${req.file.filename}`;
+       payload.avatar = storageUrl;
+     
+        var getImageName = payload.avatar.match(/\/([^\/?#]+)[^\/]*$/);
+        let imageUrl = `http://localhost:3000/uploads/${getImageName[1]}`;
+        payload.imageUrl = imageUrl;
+     
+     }
      try{
        
          // check if user has image then first delete file and then upload
@@ -86,12 +90,14 @@ const updateUser = async(req, res) => {
                 res.status(404);
                 throw new Error('User not found')
          }
-         const userPhotoInfo =userInfo.avatar;
-         if(userPhotoInfo){
-            fs.unlinkSync(DIR + userPhotoInfo)
-         }
+         //const userPhotoInfo =userInfo.avatar;
+        //  if(userPhotoInfo){
+        //     fs.unlinkSync(DIR + userPhotoInfo)
+        //  }
 
          const updateUserData = await User.findByIdAndUpdate( req.params.id,payload,{new:true})
+         updateUserData.avatar = payload.avatar ?  payload.avatar : userInfo.avatar
+         updateUserData.imageUrl = payload.imageUrl ?  payload.imageUrl : userInfo.imageUrl
      
          return res.status(200).json({status:200, message:"user updated successfully", data: updateUserData})
         }catch(err){
