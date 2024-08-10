@@ -1,0 +1,32 @@
+name: Deploy Node Application
+
+on:
+  push: 
+    branches:
+      - task-awsdeploy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Create .env file
+        run: echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> .env
+      - name: Login to docker hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}       
+      - name: Build docker image
+        run: docker build -t sangeetadammu0912/user-backend .  
+      - name: Publish image to docker hub
+        run: docker push sangeetadammu0912/user-backend:latest
+        
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull image from docker hub
+        run: docker pull sangeetadammu0912/user-backend:latest
+      - name: Delete old container
+        run: docker rm -f user-backend-container  
+      - name: Run docker container
+        run: docker run -d -p 3000:3000 --name user-backend-container sangeetadammu0912/user-backend 
