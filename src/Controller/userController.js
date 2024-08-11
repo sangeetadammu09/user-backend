@@ -8,10 +8,10 @@ const allUsers = async(req,res) => {
       const usersData = await User.find().sort({ _id: -1 });
 
       usersData.forEach(user => {
-      console.log(user)
+     // console.log(user)
       if(user.avatar !== ''){
       var getImageName = user.avatar.match(/\/([^\/?#]+)[^\/]*$/);
-      let imageUrl = `http://localhost:3000/uploads/${getImageName[1]}`;
+      let imageUrl = process.env.HOSTED_API+`/uploads/${getImageName[1]}`;
       user.imageUrl = imageUrl;
       }
       })
@@ -62,7 +62,7 @@ const singleUser = async(req,res)=>{
         phoneNumber,
         email,
         isActive,
-        imageUrl : `http://localhost:3000/uploads/${getImageName[1]}`
+        imageUrl : process.env.HOSTED_API+`/uploads/${getImageName[1]}`
     }
 
     return res.status(200).json({status:200, message:"User information", data: singleUserInfo}) 
@@ -83,7 +83,7 @@ const updateUser = async(req, res) => {
        payload.avatar = storageUrl;
      
         var getImageName = payload.avatar.match(/\/([^\/?#]+)[^\/]*$/);
-        let imageUrl = `http://localhost:3000/uploads/${getImageName[1]}`;
+        let imageUrl = process.env.HOSTED_API+`/uploads/${getImageName[1]}`;
         payload.imageUrl = imageUrl;
      
      }
