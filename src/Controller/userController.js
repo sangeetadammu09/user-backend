@@ -51,10 +51,13 @@ const createUser = async(req,res)=>{
 
 const singleUser = async(req,res)=>{
   const id = req.params.id;
+  console.log(id)
   try{
     const singleUserData = await User.findById(id);
+   
     const {firstName, lastName, phoneNumber, email, isActive, avatar} = singleUserData;
     var getImageName = avatar.match(/\/([^\/?#]+)[^\/]*$/);
+    console.log(getImageName)
 
     const singleUserInfo = {
         firstName,
@@ -62,8 +65,11 @@ const singleUser = async(req,res)=>{
         phoneNumber,
         email,
         isActive,
-        imageUrl : process.env.HOSTED_API+`/uploads/${getImageName[1]}`
+        imageUrl : getImageName ? process.env.HOSTED_API+`/uploads/${getImageName[1]}` : ''
     }
+
+
+    //console.log(singleUserData)
 
     return res.status(200).json({status:200, message:"User information", data: singleUserInfo}) 
 
@@ -114,6 +120,7 @@ const deleteUser = async(req, res) => {
          // check if user has image if yes then first delete file and then upload
          const userInfo = await User.findById(id);
          const userPhotoInfo = userInfo.avatar;
+         console.log(userPhotoInfo)
          if(userPhotoInfo){
             fs.unlinkSync(DIR + userPhotoInfo)
          }

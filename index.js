@@ -6,7 +6,7 @@ const cors = require('cors');
 const routes = require('./src/Routes/userRoute');
 const multer = require('multer');
 
-const port = process.env.PORT ||3000;
+const port = process.env.PORT ||5000;
 
 connectDb();
 
@@ -21,8 +21,9 @@ app.use('/uploads', express.static('Storage/images'));
 
 //middlewares
 app.use(express.static('public'));
-app.get('/',(req,res)=>{
-  res.sendFile(path.join(__dirname,'public/index.html'));
+app.get('/welcome',(req,res)=>{
+  console.log('welcome')
+ // res.sendFile(path.join(__dirname,'public/index.html'));
 })
 
 //base route
