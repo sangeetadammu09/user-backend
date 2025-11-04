@@ -8,7 +8,7 @@ const allUsers = async(req,res) => {
       const usersData = await User.find().sort({ _id: -1 });
 
       usersData.forEach(user => {
-      console.log(user)
+     // console.log(user)
       if(user.avatar !== ''){
       var getImageName = user.avatar.match(/\/([^\/?#]+)[^\/]*$/);
       let imageUrl = `http://localhost:3000/uploads/${getImageName[1]}`;
